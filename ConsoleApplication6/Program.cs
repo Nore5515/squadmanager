@@ -95,6 +95,30 @@ namespace ProDerSquads
                         {
                             s.setType("Basic Infantry");
                         }
+                        else if (manip.Substring(0, 1).Equals("2"))
+                        {
+                            s.setType("Sniper");
+                        }
+                        else if (manip.Substring(0, 1).Equals("3"))
+                        {
+                            s.setType("Engineer");
+                        }
+                        else if (manip.Substring(0, 1).Equals("4"))
+                        {
+                            s.setType("Machine Gunner");
+                        }
+                        else if (manip.Substring(0, 1).Equals("5"))
+                        {
+                            s.setType("AT Specialist");
+                        }
+                        else if (manip.Substring(0, 1).Equals("6"))
+                        {
+                            s.setType("Transport");
+                        }
+                        else if (manip.Substring(0, 1).Equals("7"))
+                        {
+                            s.setType("MRAP");
+                        }
                         else
                         {
                             Console.WriteLine("ERR IN TYPE SET - IMPORT");
@@ -104,12 +128,12 @@ namespace ProDerSquads
                         //Console.WriteLine(manip);
                         //Console.WriteLine($"-{manip.IndexOf("-")}-\t-{manip.Length - manip.IndexOf("-") - 1}-");
                         manip = manip.Substring(manip.IndexOf("-")+1, manip.Length - manip.IndexOf("-")-2);
-                        Console.WriteLine($"Manip: {manip}))");
-                        Console.WriteLine($"Name: {manip.Substring(0, manip.IndexOf("-"))}))");
+                        //Console.WriteLine($"Manip: {manip}))");
+                        //Console.WriteLine($"Name: {manip.Substring(0, manip.IndexOf("-"))}))");
                         s.setName(manip.Substring(0, manip.IndexOf("-")));
                         
                         manip = manip.Substring(manip.IndexOf("-")+1);
-                        Console.WriteLine($"Manip: {manip}))");
+                        //Console.WriteLine($"Manip: {manip}))");
                         s.setDesc(manip);
 
                         reply = reply.Substring(reply.IndexOf("|")+1, reply.Length-reply.IndexOf("|")-1);
@@ -130,7 +154,7 @@ namespace ProDerSquads
 
 
         //Type - 0 is Derse, 1 is Prospit
-        //Class - 0 is Conscript, 1 is Basic Infantry
+        //Class - 0 is Conscript, 1 is Basic Infantry, 2 is Sniper, 3 is Engineer, 4 is Machine Gunner, 5 is AT Specialist, 6 is Transport, 7 is MRAP
         //after the first two numbers, then name and description
         public string export()
         {
@@ -152,6 +176,30 @@ namespace ProDerSquads
                 if (squad[x].getType().Equals("Basic Infantry"))
                 {
                     s += "1";
+                }
+                if (squad[x].getType().Equals("Sniper"))
+                {
+                    s += "2";
+                }
+                if (squad[x].getType().Equals("Engineer"))
+                {
+                    s += "3";
+                }
+                if (squad[x].getType().Equals("Machine Gunner"))
+                {
+                    s += "4";
+                }
+                if (squad[x].getType().Equals("AT Specialist"))
+                {
+                    s += "5";
+                }
+                if (squad[x].getType().Equals("Transport"))
+                {
+                    s += "6";
+                }
+                if (squad[x].getType().Equals("MRAP"))
+                {
+                    s += "7";
                 }
                 s += $"-{squad[x].getName()}-{squad[x].getDesc()}";
                 s += "|";
@@ -182,7 +230,11 @@ namespace ProDerSquads
                 float count = 0;
                 for (int x = 0; x < squad.Length; x++)
                 {
-                    count += squad[x].getDMG();
+                    if (!squad[x].noVehicle)
+                    {
+                        count += squad[x].getDMG();
+                    }
+                    
                 }
                 int countish = Convert.ToInt32(Math.Floor(count));
                 return countish;
@@ -235,14 +287,21 @@ namespace ProDerSquads
                 //prompt
                 s = new Soldier(soldier, prospit);
                 //decide soldier's name and description ONLY IF they are already designed
-                if (good && s.getDMG() != 0)
+                if (good && s.getHP() != 0)
                 {
                     
                     Console.WriteLine("What is the soldier's name? What is the soldier's unique trait?\nExample, 'Name Description', 'Carl He likes cats'");
                     reply = Console.ReadLine();
 
                     //get parts
-                    name = reply.Substring(0, reply.IndexOf(" "));
+                    try
+                    {
+                        name = reply.Substring(0, reply.IndexOf(" "));
+                    }
+                    catch (ArgumentOutOfRangeException) 
+                    {
+                        break;
+                    }
                     desc = reply.Substring(reply.IndexOf(" ")+1, reply.Length - reply.IndexOf(" ")-1);
                     //assign parts
                     s.nameSoldier(name, desc);
@@ -279,39 +338,115 @@ namespace ProDerSquads
     class Soldier
     {
         float DMG, HP;
+        int setupTime;
         string name, description, type;
         bool wounded;
+        bool setup;
         bool prospit;
+        public bool noVehicle;
+        public bool noInfantry;
+        public bool vehicle;
 
         public Soldier()
         {
             DMG = 0;
             HP = 0;
             wounded = false;
+            setupTime = 0;
+            setup = true;
             name = "";
             description = "";
+            noVehicle = false;
+            noInfantry = false;
         }
 
         public Soldier(string s, bool b)
         {
+            wounded = false;
+            setupTime = 0;
+            setup = true;
+            noVehicle = false;
+            noInfantry = false;
+            type = s;
+            updateType();
+
+            prospit = b;
+        }
+
+        public void updateType()
+        {
+            string s = type;
+            wounded = false;
+            setupTime = 0;
+            setup = true;
+            noVehicle = false;
+            noInfantry = false;
             //conscript
             if (s.Equals("conscript") || s.Equals("Conscript") || s.Equals("con") || s.Equals("c") || s.Equals("Con"))
             {
                 DMG = 0.5f;
                 HP = 0.5f;
-                wounded = false;
                 type = "Conscript";
             }
             //basic infantry
-            if (s.Equals("basic")||s.Equals("Basic Infantry")||s.Equals("bi")||s.Equals("basic infantry")||s.Equals("infantry"))
+            if (s.Equals("basic") || s.Equals("Basic Infantry") || s.Equals("bi") || s.Equals("basic infantry") || s.Equals("infantry") || s.Equals("b"))
             {
                 DMG = 1;
                 HP = 1;
-                wounded = false;
                 type = "Basic Infantry";
             }
-
-            prospit = b;
+            //sniper
+            if (s.Equals("sniper") || s.Equals("Sniper") || s.Equals("sn") || s.Equals("s"))
+            {
+                DMG = 16;
+                HP = 1;
+                type = "Sniper";
+                setupTime = 2;
+                setup = false;
+                noVehicle = true;
+            }
+            //engineer
+            if (s.Equals("engineer") || s.Equals("Engineer") || s.Equals("e") || s.Equals("eng") || s.Equals("engie") || s.Equals("Engie"))
+            {
+                DMG = 0.5f;
+                HP = 1;
+                type = "Engineer";
+            }
+            //machine gunner
+            if (s.Equals("machine gunner") || s.Equals("Machine Gunner") || s.Equals("mg") || s.Equals("m") || s.Equals("Mach") || s.Equals("mach"))
+            {
+                DMG = 4;
+                HP = 2;
+                type = "Machine Gunner";
+                setupTime = 1;
+                setup = false;
+            }
+            //rocketeer
+            if (s.Equals("AT Team") || s.Equals("Rocket Team") || s.Equals("rocket") || s.Equals("AT") || s.Equals("a") || s.Equals("r") || s.Equals("at"))
+            {
+                DMG = 16;
+                HP = 1;
+                type = "AT Specialist";
+                setupTime = 1;
+                setup = false;
+                noInfantry = true;
+            }
+            //transport
+            if (s.Equals("Transport") || s.Equals("transport") || s.Equals("tran") || s.Equals("t"))
+            {
+                DMG = 0;
+                HP = 15;
+                type = "Transport";
+                vehicle = true;
+            }
+            //MRAP
+            if (s.Equals("MRAP") || s.Equals("Jeep") || s.Equals("mrap") || s.Equals("mr") || s.Equals("j"))
+            {
+                DMG = 4;
+                HP = 25;
+                type = "MRAP";
+                vehicle = true;
+            }
         }
 
         public void nameSoldier(string n, string d)
@@ -337,25 +472,9 @@ namespace ProDerSquads
 
         public void update()
         {
-            string s = type;
-            //conscript
-            if (s.Equals("conscript") || s.Equals("Conscript") || s.Equals("con") || s.Equals("c") || s.Equals("Con"))
-            {
-                DMG = 0.5f;
-                HP = 0.5f;
-                wounded = false;
-                type = "Conscript";
-            }
-            //basic infantry
-            if (s.Equals("basic") || s.Equals("Basic Infantry") || s.Equals("bi") || s.Equals("basic infantry") || s.Equals("infantry"))
-            {
-                DMG = 1;
-                HP = 1;
-                wounded = false;
-                type = "Basic Infantry";
-            }
+            updateType();
 
-            s = prospit ? "Prospit" : "Derse";
+            string s = getSpecies();
             setSpecies(s);
         }
 
@@ -397,6 +516,16 @@ namespace ProDerSquads
         public void setWounded (bool b)
         {
             wounded = b;
+        }
+
+        public float getHP()
+        {
+            return HP;
+        }
+
+        public void setHP(float f)
+        {
+            HP = f;
         }
 
         public string getSpecies()
