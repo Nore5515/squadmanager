@@ -1,8 +1,19 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+//TO-DO
+//1) Fix import/export with text documents FIXED
+//2) Add scouts, sighhh
+//3) have the build squad command be able to add, remove, reset
+//4) be able to calculate total squad damage, damage to infantry and damage to vehicles
+//5) implement "age" for each soldier
+//6) Be able to deal damage randomly, in bulk and execution damage 
+//6 a) Have a graveyard, as well as implement saving of wounds and such. damage dealt that isn't execution damage can only turn unwounded to wounded, or wounded to dead
+//6 b) Be able to give a level of cover with the damage, to scale the total damage done.
 
 namespace ProDerSquads
 {
@@ -57,8 +68,11 @@ namespace ProDerSquads
                 }
                 else if (reply.Equals("import"))
                 {
-                    Console.WriteLine("Copy your Code Here:");
-                    reply = Console.ReadLine();
+                    //Console.WriteLine("Copy your Code Here:");
+                    StreamReader sr = new StreamReader("C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\save.txt");
+                    //reply = Console.ReadLine();
+                    reply = sr.ReadLine();
+                    sr.Close();
                     string manip;
                     bool importing = true;
                     int count = 0;
@@ -127,11 +141,12 @@ namespace ProDerSquads
                         manip = manip.Substring(1, manip.Length - 1);
                         //Console.WriteLine(manip);
                         //Console.WriteLine($"-{manip.IndexOf("-")}-\t-{manip.Length - manip.IndexOf("-") - 1}-");
-                        manip = manip.Substring(manip.IndexOf("-")+1, manip.Length - manip.IndexOf("-")-2);
+                        manip = manip.Substring(manip.IndexOf("-")+1, manip.Length - manip.IndexOf("-")-1);
                         //Console.WriteLine($"Manip: {manip}))");
                         //Console.WriteLine($"Name: {manip.Substring(0, manip.IndexOf("-"))}))");
                         s.setName(manip.Substring(0, manip.IndexOf("-")));
-                        
+
+                        //Console.WriteLine(manip);
                         manip = manip.Substring(manip.IndexOf("-")+1);
                         //Console.WriteLine($"Manip: {manip}))");
                         s.setDesc(manip);
@@ -156,8 +171,10 @@ namespace ProDerSquads
         //Type - 0 is Derse, 1 is Prospit
         //Class - 0 is Conscript, 1 is Basic Infantry, 2 is Sniper, 3 is Engineer, 4 is Machine Gunner, 5 is AT Specialist, 6 is Transport, 7 is MRAP
         //after the first two numbers, then name and description
+        //ISSUE; Cuts off one character from the end!!! I believe it to be the import...
         public string export()
         {
+            StreamWriter sw = new StreamWriter("C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\save.txt");
             string s = "";
             for (int x = 0; x < squad.Length; x++)
             {
@@ -204,6 +221,9 @@ namespace ProDerSquads
                 s += $"-{squad[x].getName()}-{squad[x].getDesc()}";
                 s += "|";
             }
+            //sw write all? s?
+            sw.WriteLine(s);
+            sw.Close();
             return s;
         }
 
@@ -552,6 +572,7 @@ namespace ProDerSquads
 
         public string getDesc()
         {
+            //Console.WriteLine(description);
             return description;
         }
 
