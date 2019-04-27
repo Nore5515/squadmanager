@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 //TO-DO
 //1) Fix import/export with text documents FIXED
-//2) Add scouts, sighhh
+//2) Add scouts, sighhh FIXED
 //3) have the build squad command be able to add, remove, reset
 //4) be able to calculate total squad damage, damage to infantry and damage to vehicles
 //5) implement "age" for each soldier
@@ -133,6 +133,10 @@ namespace ProDerSquads
                         {
                             s.setType("MRAP");
                         }
+                        else if (manip.Substring(0, 1).Equals("8"))
+                        {
+                            s.setType("Scout");
+                        }
                         else
                         {
                             Console.WriteLine("ERR IN TYPE SET - IMPORT");
@@ -169,7 +173,7 @@ namespace ProDerSquads
 
 
         //Type - 0 is Derse, 1 is Prospit
-        //Class - 0 is Conscript, 1 is Basic Infantry, 2 is Sniper, 3 is Engineer, 4 is Machine Gunner, 5 is AT Specialist, 6 is Transport, 7 is MRAP
+        //Class - 0 is Conscript, 1 is Basic Infantry, 2 is Sniper, 3 is Engineer, 4 is Machine Gunner, 5 is AT Specialist, 6 is Transport, 7 is MRAP, 8 is Scout
         //after the first two numbers, then name and description
         //ISSUE; Cuts off one character from the end!!! I believe it to be the import...
         public string export()
@@ -217,6 +221,10 @@ namespace ProDerSquads
                 if (squad[x].getType().Equals("MRAP"))
                 {
                     s += "7";
+                }
+                if (squad[x].getType().Equals("Scout"))
+                {
+                    s += "8";
                 }
                 s += $"-{squad[x].getName()}-{squad[x].getDesc()}";
                 s += "|";
@@ -466,6 +474,13 @@ namespace ProDerSquads
                 HP = 25;
                 type = "MRAP";
                 vehicle = true;
+            }
+            //Scout
+            if (s.Equals("Scout") || s.Equals("scout") || s.Equals("sc") || s.Equals("sco"))
+            {
+                DMG = 1;
+                HP = 1;
+                type = "Scout";
             }
         }
 
