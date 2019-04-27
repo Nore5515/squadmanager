@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 //TO-DO
 //1) Fix import/export with text documents FIXED
 //2) Add scouts, sighhh FIXED
-//3) have the build squad command be able to add, remove, reset
+//3) have the build squad command be able to add, remove, reset FIXED
 //4) be able to calculate total squad damage, damage to infantry and damage to vehicles
 //5) implement "age" for each soldier
 //6) Be able to deal damage randomly, in bulk and execution damage 
@@ -49,7 +49,26 @@ namespace ProDerSquads
                 }
                 else if (reply.Equals("buildsquad"))
                 {
-                    main.buildSquad();
+                    Console.WriteLine("What do you want to do?");
+                    Console.WriteLine("\t'add' - Add new soldier\n\t'remove' - Removes a soldier from the squad by name\n\t'reset' - Resets the squad to a clean slate.");
+                    reply = Console.ReadLine();
+                    if (reply.Equals("add"))
+                    {
+                        main.buildSquad();
+                    }
+                    else if (reply.Equals("remove"))
+                    {
+                        main.removeSquad();
+                    }
+                    else if (reply.Equals("reset"))
+                    {
+                        main.resetSquad();
+                    }
+                    else
+                    {
+                        Console.WriteLine("I didn't understand that.");
+                    }
+                    
                 }
                 else if (reply.Equals("view"))
                 {
@@ -169,6 +188,79 @@ namespace ProDerSquads
             }
 
 
+        }
+
+        private void resetSquad()
+        {
+            squad = new Soldier[0];
+            Console.WriteLine("Squad reset!");
+        }
+
+        //removal has issue; seems to remove both the target AND the next target. not what we want.
+        private void removeSquad()
+        {
+            bool removing = true;
+            bool found = false;
+            string s;
+            while (removing)
+            {
+                Console.WriteLine("Who do you want to remove? (Type their name to remove, type 'view' to see the squad again, type 'done' to go back)");
+                s = Console.ReadLine();
+                if (s.Equals("view"))
+                {
+                    Console.WriteLine(view());
+                }
+                else if (s.Equals("done") ||s.Equals("exit") || s.Equals("quit"))
+                {
+                    removing = false;
+                }
+                else
+                {
+                    removeSoldier(s);
+                } 
+            }
+        }
+
+        public bool removeSoldier (string name)
+        {
+            int loc = -1;
+            int count = 0;
+            bool contains = false;
+            Soldier[] newSquad = new Soldier[squad.Length - 1];
+            for (int x = 0; x < squad.Length; x++)
+            {
+                if (squad[x].getName() == name)
+                {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (contains)
+            {
+                for (int y = 0; y < squad.Length; y++)
+                {
+                    if (squad[y].getName() == name)
+                    {
+                        Console.WriteLine("Found at pos {0}. Setting y to {1}", y, y+1);
+                        //y++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Did not find at pos {0}. Assigning {1} in squad to pos {2} in newSquad. Increasing count to {3}", y, squad[y].getName(), count, count+1);
+                        newSquad[count] = squad[y];
+                        count++;
+                    }
+                }
+                squad = newSquad;
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Soldier not found.");
+            }
+            
+            return false;
         }
 
 
