@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 //1) Fix import/export with text documents FIXED
 //2) Add scouts, sighhh FIXED
 //3) have the build squad command be able to add, remove, reset FIXED
-//4) be able to calculate total squad damage, damage to infantry and damage to vehicles
+//4) be able to calculate total squad damage, damage to infantry and damage to vehicles FIXED
 //5) implement "age" for each soldier
 //6) Be able to deal damage randomly, in bulk and execution damage 
 //6 a) Have a graveyard, as well as implement saving of wounds and such. damage dealt that isn't execution damage can only turn unwounded to wounded, or wounded to dead
@@ -347,16 +347,51 @@ namespace ProDerSquads
             }
             else
             {
-                float count = 0;
-                for (int x = 0; x < squad.Length; x++)
+                int countish;
+                float count = -1;
+                Console.WriteLine("What type of damage would you like to view?\n\t'all' - Total combined damage.\n\t'infantry' - All damage that affects infantry.\n\t'vehicle' - All damage that affects vehicle.");
+                string reply = Console.ReadLine();
+                if (reply.Equals("all"))
                 {
-                    if (!squad[x].noVehicle)
+                    count = 0;
+                    for (int x = 0; x < squad.Length; x++)
                     {
-                        count += squad[x].getDMG();
+                        if (!squad[x].noVehicle && !squad[x].noInfantry)
+                        {
+                            count += squad[x].getDMG();
+                        }
                     }
-                    
                 }
-                int countish = Convert.ToInt32(Math.Floor(count));
+                else if (reply.Equals("infantry"))
+                {
+                    count = 0;
+                    for (int x = 0; x < squad.Length; x++)
+                    {
+                        if (!squad[x].noVehicle && !squad[x].noInfantry)
+                        {
+                            count += squad[x].getDMG();
+                        }
+
+                    }
+                }
+                else if (reply.Equals("vehicle"))
+                {
+                    count = 0;
+                    for (int x = 0; x < squad.Length; x++)
+                    {
+                        if (squad[x].noVehicle)
+                        {
+                            count += squad[x].getDMG();
+                        }
+
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Sorry, I didn't understand.");
+                }
+
+                countish = Convert.ToInt32(Math.Floor(count));
                 return countish;
             }
         }
