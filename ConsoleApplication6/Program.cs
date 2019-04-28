@@ -41,7 +41,7 @@ namespace ProDerSquads
             {
                 Console.WriteLine("What would you like to do?\n\t'dmg' - Calculate damage dealt of a Squad\n\t'buildsquad' - Builds your Squad");
                 Console.WriteLine("\t'view' - View your current squad\n\t'full view' - View your squad in it's entirety!\n\t'export' - Displays your squad code.");
-                Console.WriteLine("\t'import' - Import a squad from a chain of text");
+                Console.WriteLine("\t'import' - Import a squad from a chain of text\n\t'age' - Ages all living members of your squad.\n\t'resetage' - Resets age of all units to 0.");
                 reply = Console.ReadLine();
                 if (reply.Equals("dmg"))
                 {
@@ -87,99 +87,15 @@ namespace ProDerSquads
                 }
                 else if (reply.Equals("import"))
                 {
-                    //Console.WriteLine("Copy your Code Here:");
-                    StreamReader sr = new StreamReader("C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\save.txt");
-                    //reply = Console.ReadLine();
-                    reply = sr.ReadLine();
-                    sr.Close();
-                    string manip;
-                    bool importing = true;
-                    int count = 0;
-                    Soldier s;
-                    while (importing)
-                    {
-                        if (reply.Length < 3)
-                        {
-                            importing = false;
-                            break;
-                        }
-                        s = new Soldier();
-                        manip = reply.Substring(0,reply.IndexOf("|"));
-                        if (manip.Substring(0, 1).Equals("0"))
-                        {
-                            s.setSpecies("Derse");
-                        }
-                        else if (manip.Substring(0,1).Equals("1"))
-                        {
-                            s.setSpecies("Prospit");
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERR IN SPECIES SET - IMPORT");
-                        }
-
-                        manip = manip.Substring(1, manip.Length - 1);
-
-                        if (manip.Substring(0, 1).Equals("0"))
-                        {
-                            s.setType("Conscript");
-                        }
-                        else if (manip.Substring(0, 1).Equals("1"))
-                        {
-                            s.setType("Basic Infantry");
-                        }
-                        else if (manip.Substring(0, 1).Equals("2"))
-                        {
-                            s.setType("Sniper");
-                        }
-                        else if (manip.Substring(0, 1).Equals("3"))
-                        {
-                            s.setType("Engineer");
-                        }
-                        else if (manip.Substring(0, 1).Equals("4"))
-                        {
-                            s.setType("Machine Gunner");
-                        }
-                        else if (manip.Substring(0, 1).Equals("5"))
-                        {
-                            s.setType("AT Specialist");
-                        }
-                        else if (manip.Substring(0, 1).Equals("6"))
-                        {
-                            s.setType("Transport");
-                        }
-                        else if (manip.Substring(0, 1).Equals("7"))
-                        {
-                            s.setType("MRAP");
-                        }
-                        else if (manip.Substring(0, 1).Equals("8"))
-                        {
-                            s.setType("Scout");
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERR IN TYPE SET - IMPORT");
-                        }
-
-                        manip = manip.Substring(1, manip.Length - 1);
-                        //Console.WriteLine(manip);
-                        //Console.WriteLine($"-{manip.IndexOf("-")}-\t-{manip.Length - manip.IndexOf("-") - 1}-");
-                        manip = manip.Substring(manip.IndexOf("-")+1, manip.Length - manip.IndexOf("-")-1);
-                        //Console.WriteLine($"Manip: {manip}))");
-                        //Console.WriteLine($"Name: {manip.Substring(0, manip.IndexOf("-"))}))");
-                        s.setName(manip.Substring(0, manip.IndexOf("-")));
-
-                        //Console.WriteLine(manip);
-                        manip = manip.Substring(manip.IndexOf("-")+1);
-                        //Console.WriteLine($"Manip: {manip}))");
-                        s.setDesc(manip);
-
-                        reply = reply.Substring(reply.IndexOf("|")+1, reply.Length-reply.IndexOf("|")-1);
-                        s.update();
-                        main.addSoldier(s);
-                        count++;
-                    }
-                    Console.WriteLine("Import Complete!");
+                    main.import();
+                }
+                else if (reply.Equals("age"))
+                {
+                    main.age();
+                }
+                else if (reply.Equals("resetage"))
+                {
+                    main.resetAge();
                 }
                 else
                 {
@@ -190,10 +106,128 @@ namespace ProDerSquads
 
         }
 
+        public void resetAge()
+        {
+            for (int x = 0; x < squad.Length; x++)
+            {
+                squad[x].setAge(0);
+            }
+        }
+
+        private void age()
+        {
+            for (int x = 0; x < squad.Length; x++)
+            {
+                squad[x].setAge(squad[x].getAge() + 1);
+            }
+        }
+
         private void resetSquad()
         {
             squad = new Soldier[0];
             Console.WriteLine("Squad reset!");
+        }
+
+        public void import()
+        {
+            //Console.WriteLine("Copy your Code Here:");
+            StreamReader sr = new StreamReader("C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\save.txt");
+            //reply = Console.ReadLine();
+            string reply = sr.ReadLine();
+            sr.Close();
+            string manip;
+            bool importing = true;
+            int count = 0;
+            Soldier s;
+            while (importing)
+            {
+                if (reply.Length < 3)
+                {
+                    importing = false;
+                    break;
+                }
+                s = new Soldier();
+                manip = reply.Substring(0, reply.IndexOf("|"));
+                if (manip.Substring(0, 1).Equals("0"))
+                {
+                    s.setSpecies("Derse");
+                }
+                else if (manip.Substring(0, 1).Equals("1"))
+                {
+                    s.setSpecies("Prospit");
+                }
+                else
+                {
+                    Console.WriteLine("ERR IN SPECIES SET - IMPORT");
+                }
+
+                manip = manip.Substring(1, manip.Length - 1);
+
+                if (manip.Substring(0, 1).Equals("0"))
+                {
+                    s.setType("Conscript");
+                }
+                else if (manip.Substring(0, 1).Equals("1"))
+                {
+                    s.setType("Basic Infantry");
+                }
+                else if (manip.Substring(0, 1).Equals("2"))
+                {
+                    s.setType("Sniper");
+                }
+                else if (manip.Substring(0, 1).Equals("3"))
+                {
+                    s.setType("Engineer");
+                }
+                else if (manip.Substring(0, 1).Equals("4"))
+                {
+                    s.setType("Machine Gunner");
+                }
+                else if (manip.Substring(0, 1).Equals("5"))
+                {
+                    s.setType("AT Specialist");
+                }
+                else if (manip.Substring(0, 1).Equals("6"))
+                {
+                    s.setType("Transport");
+                }
+                else if (manip.Substring(0, 1).Equals("7"))
+                {
+                    s.setType("MRAP");
+                }
+                else if (manip.Substring(0, 1).Equals("8"))
+                {
+                    s.setType("Scout");
+                }
+                else
+                {
+                    Console.WriteLine("ERR IN TYPE SET - IMPORT");
+                }
+
+                manip = manip.Substring(2);
+                //Console.WriteLine($"[{manip}]\n\t[{manip.Substring(0, manip.IndexOf("-"))}]");
+                //Console.WriteLine(int.Parse(manip.Substring(0, manip.IndexOf("-"))));
+                s.setAge(int.Parse(manip.Substring(0, manip.IndexOf("-"))));
+
+                manip = manip.Substring(1, manip.Length - 1);
+                //Console.WriteLine(manip);
+                //Console.WriteLine($"-{manip.IndexOf("-")}-\t-{manip.Length - manip.IndexOf("-") - 1}-");
+                manip = manip.Substring(manip.IndexOf("-") + 1, manip.Length - manip.IndexOf("-") - 1);
+                //Console.WriteLine($"Manip: {manip}))");
+                //Console.WriteLine($"Name: {manip.Substring(0, manip.IndexOf("-"))}))");
+                s.setName(manip.Substring(0, manip.IndexOf("-")));
+
+                //Console.WriteLine(manip);
+                manip = manip.Substring(manip.IndexOf("-") + 1);
+                //Console.WriteLine($"Manip: {manip}))");
+                s.setDesc(manip);
+
+                reply = reply.Substring(reply.IndexOf("|") + 1, reply.Length - reply.IndexOf("|") - 1);
+                s.update();
+                addSoldier(s);
+                count++;
+            }
+            Console.WriteLine("Import Complete!");
         }
 
         //removal has issue; seems to remove both the target AND the next target. not what we want.
@@ -266,7 +300,9 @@ namespace ProDerSquads
 
         //Type - 0 is Derse, 1 is Prospit
         //Class - 0 is Conscript, 1 is Basic Infantry, 2 is Sniper, 3 is Engineer, 4 is Machine Gunner, 5 is AT Specialist, 6 is Transport, 7 is MRAP, 8 is Scout
-        //after the first two numbers, then name and description
+        //Age - Just the number. Represented by -#-, then name and desc
+        //after the first three numbers, then name and description
+        //Example - 00-Kyle-Geek|
         //ISSUE; Cuts off one character from the end!!! I believe it to be the import...
         public string export()
         {
@@ -318,7 +354,10 @@ namespace ProDerSquads
                 {
                     s += "8";
                 }
-                s += $"-{squad[x].getName()}-{squad[x].getDesc()}";
+
+                s += $"-{squad[x].getAge()}-";
+                
+                s += $"{squad[x].getName()}-{squad[x].getDesc()}";
                 s += "|";
             }
             //sw write all? s?
@@ -332,7 +371,7 @@ namespace ProDerSquads
             String s = "Your Squad:\n";
             for (int x = 0; x < squad.Length; x++)
             {
-                s += ($"{squad[x].getSpecies()} {squad[x].getType()} - {squad[x].getName()}, {squad[x].getWounded()}\n");
+                s += ($"{squad[x].getSpecies()} {squad[x].getType()} - {squad[x].getName()}[{squad[x].getAge()}], {squad[x].getWounded()}\n");
             }
             return s;
         }
@@ -494,6 +533,7 @@ namespace ProDerSquads
     {
         float DMG, HP;
         int setupTime;
+        int age;
         string name, description, type;
         bool wounded;
         bool setup;
@@ -506,6 +546,7 @@ namespace ProDerSquads
         {
             DMG = 0;
             HP = 0;
+            age = 0;
             wounded = false;
             setupTime = 0;
             setup = true;
@@ -524,8 +565,8 @@ namespace ProDerSquads
             noInfantry = false;
             type = s;
             updateType();
-
             prospit = b;
+            age = 0;
         }
 
         public void updateType()
@@ -627,7 +668,7 @@ namespace ProDerSquads
             String s = "";
             String species = prospit ? "Prospit" : "Derse";
 
-            s += ($"{species} {type} {name}\n\t{description}\n\tHP (wounded): {HP}, {wounded}\n\tDMG: {DMG}");
+            s += ($"{species} {type} {name}[{age}]\n\t{description}\n\tHP (wounded): {HP}, {wounded}\n\tDMG: {DMG}");
 
             return s;
         }
@@ -721,6 +762,16 @@ namespace ProDerSquads
         public void setDesc(string s)
         {
             description = s;
+        }
+
+        public void setAge(int i)
+        {
+            age = i;
+        }
+
+        public int getAge()
+        {
+            return age;
         }
     }
 
