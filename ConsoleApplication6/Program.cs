@@ -10,10 +10,13 @@ using System.Threading.Tasks;
 //2) Add scouts, sighhh FIXED
 //3) have the build squad command be able to add, remove, reset FIXED
 //4) be able to calculate total squad damage, damage to infantry and damage to vehicles FIXED
-//5) implement "age" for each soldier
+//5) implement "age" for each soldier FIXED
 //6) Be able to deal damage randomly, in bulk and execution damage 
 //6 a) Have a graveyard, as well as implement saving of wounds and such. damage dealt that isn't execution damage can only turn unwounded to wounded, or wounded to dead
 //6 b) Be able to give a level of cover with the damage, to scale the total damage done.
+//7) Support multiple squads FIXED
+//8) Be able to have one squad fire at another squad
+//9) Be able to display all squads with light info about each
 
 namespace ProDerSquads
 {
@@ -22,6 +25,7 @@ namespace ProDerSquads
     class Program
     {
         Soldier[] squad;
+        string squadName = "err";
 
         public Program()
         {
@@ -42,10 +46,27 @@ namespace ProDerSquads
                 Console.WriteLine("What would you like to do?\n\t'dmg' - Calculate damage dealt of a Squad\n\t'buildsquad' - Builds your Squad");
                 Console.WriteLine("\t'view' - View your current squad\n\t'full view' - View your squad in it's entirety!\n\t'export' - Displays your squad code.");
                 Console.WriteLine("\t'import' - Import a squad from a chain of text\n\t'age' - Ages all living members of your squad.\n\t'resetage' - Resets age of all units to 0.");
+                Console.WriteLine("\t'dealdmg' - Deal an amount of damage to the team, wounding unwounded and killing wounded.\n\t'newsquad' - Creates a new squad, and sets current squad to this new squad."); 
                 reply = Console.ReadLine();
                 if (reply.Equals("dmg"))
                 {
                     Console.WriteLine(main.dmg());
+                }
+                else if (reply.Equals("newsquad"))
+                {
+                    Console.WriteLine("Doing this will delete your current squad.\n\t'save'\n\t'back'\n\t'doit'");
+                    reply = Console.ReadLine();
+                    if (reply.Equals("save"))
+                    {
+                        Console.WriteLine("Saving...");
+                        main.export();
+                    }
+                }
+                else if (reply.Equals("dealdmg"))
+                {
+                    Console.WriteLine("How much damage do you want to do?");
+                    float dmg = float.Parse(Console.ReadLine());
+                    main.dealdmg(dmg);
                 }
                 else if (reply.Equals("buildsquad"))
                 {
@@ -106,6 +127,40 @@ namespace ProDerSquads
 
         }
 
+        //picks a random unit, check if wounded or not. if wounded, subtract damage. If DMG is still > 0, then the unit is dead. If the unit isn't wounded, then they are now.
+        //BROKEN
+        private void dealdmg(float dmg)
+        {
+            Random rand = new Random();
+            float totalDMG = dmg;
+            int target;
+            while (totalDMG > 0)
+            {
+                target = rand.Next(0, uninjuredSoldiers());
+                //squad[target].setHP()
+            }
+            throw new NotImplementedException();
+        }
+
+        //for each squad member, if they're injured, skip. otherwise, check if they're in the right pos.
+        //BROKEN
+        public Soldier getUninjured(int pos)
+        {
+            int uninjuredCount = 0;
+            for (int x = 0; x < squad.Length; x++)
+            {
+                if (!squad[x].getWounded())
+                {
+                    if (uninjuredCount == pos)
+                    {
+                        return squad[x];
+                    }
+                }
+            }
+            Console.WriteLine("Didn't find the soldier.");
+            return null;
+        }
+
         public void resetAge()
         {
             for (int x = 0; x < squad.Length; x++)
@@ -125,15 +180,36 @@ namespace ProDerSquads
         private void resetSquad()
         {
             squad = new Soldier[0];
+            squadName = "err";
             Console.WriteLine("Squad reset!");
+        }
+
+        public int uninjuredSoldiers()
+        {
+            int count = 0;
+            for (int x = 0; x < squad.Length; x++)
+            {
+                if (!squad[x].getWounded())
+                {
+                    count++;
+                }
+            }
+            return count;
         }
 
         public void import()
         {
             //Console.WriteLine("Copy your Code Here:");
-            StreamReader sr = new StreamReader("C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\save.txt");
+            Console.WriteLine("What is the name of your squad?\n\t'view' - See all squads");
+            string reply = Console.ReadLine();
+            if (reply.Equals("view"))
+            {
+                //Console.WriteLine(stringSquads());
+                //DOES NOT WORK
+            }
+            StreamReader sr = new StreamReader($"C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\{reply}.txt");
             //reply = Console.ReadLine();
-            string reply = sr.ReadLine();
+            reply = sr.ReadLine();
             sr.Close();
             string manip;
             bool importing = true;
@@ -306,7 +382,7 @@ namespace ProDerSquads
         //ISSUE; Cuts off one character from the end!!! I believe it to be the import...
         public string export()
         {
-            StreamWriter sw = new StreamWriter("C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\save.txt");
+            StreamWriter sw = new StreamWriter($"C:\\Users\\Nore5515\\Documents\\Visual Studio 2015\\Projects\\ConsoleApplication6\\{squadName}.txt");
             string s = "";
             for (int x = 0; x < squad.Length; x++)
             {
@@ -435,8 +511,18 @@ namespace ProDerSquads
             }
         }
 
+        public void firstTimeSquad()
+        {
+            if (squadName.Equals("err"))
+            {
+                Console.WriteLine("Your squad needs a name!");
+                squadName = Console.ReadLine();
+            }
+        }
+
         public void buildSquad()
         {
+            firstTimeSquad();
             Console.WriteLine("You should type out the full name of the unit, like 'Prospit Conscript' or 'derse con' or 'p c'.\n\tConsripts\n\tBasic Infantry");
             bool decided = false;
             bool prospit;
